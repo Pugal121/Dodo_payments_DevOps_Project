@@ -4,7 +4,7 @@
 
 The goal of this task is to provision a Kubernetes cluster and deploy a three-tier microservices application demonstrating core orchestration principles:
 
-* **Container scheduling**
+* Container scheduling
 * **Service discovery**
 * **Configuration management**
 * **Secret management**
