@@ -109,6 +109,7 @@ It allows:
 * **Cluster inspection**
 * **Debugging**
 * **Scaling operations**
+
 Verify:
 ```bash
 kubectl get nodes
@@ -123,9 +124,12 @@ Namespaces provide:
 * **Resource organization**
 * **Multi-team separation**
 * **RBAC control boundaries**
+
 Production clusters should never deploy everything in default.
 
 # PHASE 3 — Database Layer (PostgreSQL)
+
+## Step 1: Create Secret
 Purpose:
 * **Store database credentials securely**
 * **Avoid hardcoding sensitive values**
@@ -133,8 +137,164 @@ Purpose:
 kubectl apply -f postgres-secret.yaml
 ```
 
+## Step 2: PostgreSQL Deployment
+
+Resource Requests & Limits
+```bash
+requests:
+  cpu: "200m"
+  memory: "256Mi"
+limits:
+  cpu: "500m"
+  memory: "512Mi"
+```
+Why?
+* **Prevent resource starvation**
+* **Enable scheduler to place pods properly**
+* **Required for HPA calculations**
+
+```bash
+kubectl apply -f postgres-deployment.yaml
+```
+
+## Step 3: PostgreSQL Service
+Type: ClusterIP
+Reason:
+* **Database should NOT be exposed externally**
+* **Only backend communicates with it**
+
+```bash
+kubectl apply -f postgres-service.yaml
+```
+
+# PHASE 4 — Backend Layer
+## Step 1: ConfigMap
+Purpose:
+* **Store non-sensitive configuration**
+* **Inject DB_HOST and DB_PORT**
+
+Why ConfigMap?
+* **Decouples configuration from container image**
+* **Enables dynamic configuration changes**
+```bash
+kubectl apply -f backend-config.yaml
+```
+
+## Step 2: Backend Deployment
+Key Features:
+* **2 replicas (High Availability)**
+* **Resource control**
+* **HTTP Liveness & Readiness probes**
+* **ConfigMap injection**
+
+Why 2 replicas?
+* **Zero downtime**
+* **Load distribution**
+* **Fault tolerance**
+```bash
+kubectl apply -f backend-deployment.yaml
+```
+
+## Step 3: Backend Service
+Type: ClusterIP
+Why?
+* **Backend is internal service**
+* **Frontend communicates internally**
+* **No public exposure required**
+```bash
+kubectl apply -f backend-service.yaml
+```
+
+# PHASE 5 — Frontend Layer
+## Step 1: Frontend Deployment
+Features:
+* **2 replicas**
+* **Health checks**
+* **Resource management**
+```bash
+kubectl apply -f frontend-deployment.yaml
+```
+
+## Step 2: Frontend Service (LoadBalancer)
+Type: LoadBalancer
+Why?
+* **Exposes service publicly**
+* **AWS automatically provisions ELB**
+* **Assigns public DNS**
+```bash
+kubectl apply -f frontend-service.yaml
+```
+Check:
+```bash
+kubectl get svc -n microservices
+```
+Access via ELB DNS.
 
 
+# PHASE 6 — Horizontal Pod Autoscaler (HPA)
+
+## Step 1: Install Metrics Server
+EKS does NOT install it by default.
+
+Why?
+* **HPA requires CPU metrics from metrics-server.**
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+Verify:
+```bash
+kubectl get deployment metrics-server -n kube-system
+```
+
+## Step 2: Create HPA for Backend
+
+```bash
+kubectl autoscale deployment backend \
+  --cpu-percent=50 \
+  --min=2 \
+  --max=5 \
+  -n microservices
+```
+Why 50%?
+* **Prevent overload**
+* **Maintain performance buffer**
+* **Scale before saturation**
+
+Verify
+```bash
+kubectl get hpa -n microservices
+```
+
+# PHASE 7 — Load Testing
+
+Generate load:
+```bash
+kubectl run -i --tty loadgen --rm --image=busybox -n microservices -- /bin/sh
+```
+
+Inside:
+```bash
+while true; do wget -q -O- http://backend; done
+```
+Monitor scaling:
+```bash
+kubectl get pods -n microservices -w
+```
+Expected Behavior:
+* **CPU increases**
+* **HPA scales backend pods**
+* **New replicas created automatically**
+* **Scale down after load stops**
 
 
+# Conclusion
+This project demonstrates:
+* **Cloud-native architecture**
+* **Kubernetes orchestration fundamentals**
+* **Secure configuration management**
+* **Scalable backend services**
+* **High availability design**
+* **Production-ready deployment patterns**
 
+It reflects real-world DevOps engineering practices used in enterprise Kubernetes environments.
