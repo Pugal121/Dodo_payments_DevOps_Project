@@ -34,7 +34,7 @@ The application consists of three microservices:
 
 ## Step 1: Launch EC2 Instance
 EC2 Instance Configuration
-     * **Instance Type: t3.medium**
+* **Instance Type: t3.medium**
      * **OS: Ubuntu**
      * **Storage: 25GB EBS Volume**
 
