@@ -1,14 +1,16 @@
 # Task 1: Kubernetes Cluster Setup & Microservices Deployment
 
-# Objective
+## Objective
+
 The goal of this task is to provision a Kubernetes cluster and deploy a three-tier microservices application demonstrating core orchestration principles:
-  => Container scheduling
-  => Service discovery
-  => Configuration management
-  => Secret management
-  => Health monitoring
-  => Resource control
-  => Horizontal autoscaling
+
+* **Container scheduling**
+* **Service discovery**
+* **Configuration management**
+* **Secret management**
+* **Health monitoring**
+* **Resource control**
+* **Horizontal autoscaling**
 
 This implementation uses Amazon EKS (Elastic Kubernetes Service) as the managed control plane.
 
