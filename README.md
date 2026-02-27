@@ -12,4 +12,13 @@ Set up a production-grade Kubernetes cluster on Amazon EKS and deploy a microser
 => Health Checks (Liveness & Readiness Probes)
 => Horizontal Pod Autoscaler (HPA)
 
-🏗 Architecture Overview
+# 🏗 Architecture Overview
+The application consists of three microservices:
+1. Frontend Service
+     => NGINX (acting as web frontend)
+     => Exposed via AWS Elastic Load Balancer
+2. Backend Service
+     => API service (Echoserver used for demo)
+     => Communicates with PostgreSQL
+     => Configured with ConfigMap
+     => Autoscaled using HPA
