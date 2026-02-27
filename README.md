@@ -34,9 +34,10 @@ EC2 Instance Configuration
      => OS: Ubuntu
      => Storage: 25GB EBS Volume
 
-# Install AWS CLI
-'''bash
+## Install AWS CLI
+
+```bash
 sudo apt update
 sudo apt install awscli -y
 aws --version
-'''
+```
