@@ -22,3 +22,19 @@ The application consists of three microservices:
      => Communicates with PostgreSQL
      => Configured with ConfigMap
      => Autoscaled using HPA
+3. Database Service
+     => PostgreSQL
+     => Credentials stored securely using Kubernetes Secret
+     => Exposed internally using ClusterIP
+
+
+# 🚀 Phase 1 — Infrastructure Setup (Amazon EKS)
+EC2 Instance Configuration
+     => Instance Type: t3.medium
+     => OS: Ubuntu
+     => Storage: 25GB EBS Volume
+
+# Install AWS CLI
+sudo apt update
+sudo apt install awscli -y
+aws --version
