@@ -34,7 +34,7 @@ The application consists of three microservices:
 
 ## Step 1: Launch EC2 Instance
 EC2 Instance Configuration
-* **Instance Type: t3.medium**
+     * **Instance Type: t3.medium**
      * **OS: Ubuntu**
      * **Storage: 25GB EBS Volume**
 
@@ -46,9 +46,9 @@ sudo apt install awscli -y
 aws --version
 ```
 AWS CLI enables:
-     * **Authentication with AWS**
-     * **IAM-based cluster creation**
-     * **EKS API interaction**
+* **Authentication with AWS**
+* **IAM-based cluster creation**
+* **EKS API interaction**
 
 ## Step 3: Configure AWS Credentials
 
@@ -57,9 +57,9 @@ aws configure
 aws sts get-caller-identity
 ```
 This ensures:
-     * **IAM authentication is working**
-     * **The correct AWS account is being used**
-     * **No permission errors during cluster creation**
+* **IAM authentication is working**
+* **The correct AWS account is being used**
+* **No permission errors during cluster creation**
 
 ## Step 4: Install eksctl
 ```bash
@@ -68,10 +68,10 @@ sudo mv /tmp/eksctl /usr/local/bin
 eksctl version
 ```
 eksctl is the official CLI tool for:
-     * **Creating EKS clusters**
-     * **Managing node groups**
-     * **Configuring IAM roles automatically**
-     * **It simplifies infrastructure provisioning significantly.**
+* **Creating EKS clusters**
+* **Managing node groups**
+* **Configuring IAM roles automatically**
+* **It simplifies infrastructure provisioning significantly.**
 
 ## Step 5: Create EKS Cluster
 ```bash
@@ -86,14 +86,14 @@ eksctl create cluster \
   --managed
 ```
 What This Does
-     * **Creates EKS control plane (managed by AWS)**
-     * **Creates Managed Node Group**
-     * **Enables auto scaling between 2–3 nodes**
+* **Creates EKS control plane (managed by AWS)**
+* **Creates Managed Node Group**
+* **Enables auto scaling between 2–3 nodes**
 
 Why Managed Node Group?
-     * **Automatic patching**
-     * **Better lifecycle management**
-     * **Production-grade reliability**
+* **Automatic patching**
+* **Better lifecycle management**
+* **Production-grade reliability**
 
 ## Step 6: Install kubectl
 ```bash
@@ -105,10 +105,10 @@ kubectl version --client
 Why?
 kubectl is the Kubernetes API client.
 It allows:
-     * **Resource deployment**
-     * **Cluster inspection**
-     * **Debugging**
-     * **Scaling operations**
+* **Resource deployment**
+* **Cluster inspection**
+* **Debugging**
+* **Scaling operations**
 Verify:
 ```bash
 kubectl get nodes
@@ -119,16 +119,16 @@ kubectl get nodes
 kubectl create namespace microservices
 ```
 Namespaces provide:
-     * **Logical isolation**
-     * **Resource organization**
-     * **Multi-team separation**
-     * **RBAC control boundaries**
+* **Logical isolation**
+* **Resource organization**
+* **Multi-team separation**
+* **RBAC control boundaries**
 Production clusters should never deploy everything in default.
 
 # PHASE 3 — Database Layer (PostgreSQL)
 Purpose:
-     * **Store database credentials securely**
-     * **Avoid hardcoding sensitive values**
+* **Store database credentials securely**
+* **Avoid hardcoding sensitive values**
 ```bash
 kubectl apply -f postgres-secret.yaml
 ```
