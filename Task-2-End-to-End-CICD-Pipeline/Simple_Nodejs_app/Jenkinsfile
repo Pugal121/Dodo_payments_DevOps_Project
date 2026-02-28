@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_REGION = "ap-south-1"
+        ACCOUNT_ID = "075008446817"
+        ECR_REPO = "075008446817.dkr.ecr.ap-south-1.amazonaws.com/microservice-app"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    docker build -t microservice-app:$IMAGE_TAG .
+                '''
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                      --format template \
+                      --template "@$HOME/trivy-templates/html.tpl" \
+                      -o trivy-report.html \
+                      microservice-app:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Tag Image for ECR') {
+            steps {
+                sh '''
+                    docker tag microservice-app:$IMAGE_TAG $ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                withAWS(credentials: 'jenkins-aws-creds', region: "${AWS_REGION}") {
+                    sh '''
+                        aws ecr get-login-password --region $AWS_REGION | \
+                        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                sh '''
+                    docker push $ECR_REPO:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Update GitOps Repo') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github_token',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_PASS'
+                )]) {
+                    sh '''
+                        rm -rf microservice-gitops
+
+                        git clone https://$GIT_USER:$GIT_PASS@github.com/Pugal121/microservice-gitops.git
+                        cd microservice-gitops/staging
+
+                        sed -i "s|image: .*|image: $ECR_REPO:$IMAGE_TAG|g" deployment.yaml
+
+                        git config user.email "jenkins@ci.com"
+                        git config user.name "jenkins"
+
+                        git add deployment.yaml
+                        git commit -m "Update image tag to $IMAGE_TAG"
+                        git push
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-report.html', allowEmptyArchive: true
+        }
+    }
+}
