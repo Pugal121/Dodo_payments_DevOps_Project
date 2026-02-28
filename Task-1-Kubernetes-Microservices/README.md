@@ -4,7 +4,7 @@
 
 The goal of this task is to provision a Kubernetes cluster and deploy a three-tier microservices application demonstrating core orchestration principles:
 
-* **Container scheduling**
+* *Container scheduling*
 * **Service discovery**
 * **Configuration management**
 * **Secret management**
@@ -232,6 +232,15 @@ Access via ELB DNS.
 
 
 # PHASE 6 — Horizontal Pod Autoscaler (HPA)
+Horizontal Pod Autoscaler (HPA) automatically increases or decreases the number of pod replicas based on observed resource utilization (CPU in this case).
+It scales horizontally — meaning it adjusts the number of pods, not the size of the node.
+
+# Why HPA is Critical in Production
+* **Handles unpredictable traffic**
+* **Prevents outages**
+* **Optimizes infrastructure cost**
+* **Maintains service reliability**
+* **Supports microservices architecture**
 
 ## Step 1: Install Metrics Server
 EKS does NOT install it by default.
