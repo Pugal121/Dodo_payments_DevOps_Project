@@ -30,7 +30,7 @@ The application consists of three microservices:
      * **Exposed internally using ClusterIP**
 
 
-# 🚀 Phase 1 — Infrastructure Setup (Amazon EKS)
+# Phase 1 — Infrastructure Setup (Amazon EKS)
 
 ## Step 1: Launch EC2 Instance
 EC2 Instance Configuration
