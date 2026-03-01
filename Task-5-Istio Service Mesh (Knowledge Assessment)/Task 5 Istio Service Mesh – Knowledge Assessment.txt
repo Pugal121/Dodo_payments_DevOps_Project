@@ -1,0 +1,147 @@
+Task 5 Istio Service Mesh – Knowledge Assessment
+
+
+1.Explain the role of Istio in a Kubernetes environment. How does the sidecar proxy model work, and what problems does it solve compared to application-level networking?
+
+Istio is a service mesh that manages service-to-service communication in Kubernetes. 
+It provides:
+=> mTLS encryption
+=> Traffic routing and load balancing
+=> Retry, timeout, circuit breaking
+=> Authorization policies
+=> Observability (metrics, logs, tracing)
+
+Sidecar Proxy Model
+
+Istio injects an Envoy sidecar proxy into each pod.
+All inbound and outbound traffic passes through the sidecar. The proxy enforces:
+=> Security (mTLS)
+=> Routing rules
+=> Telemetry collection
+
+Problems It Solves
+
+Compared to application-level networking:
+=> Removes networking logic from application code
+=> Provides automatic mTLS
+=> Enables centralized traffic control
+=> Standardizes observability
+=> Implements zero-trust security
+
+
+
+
+
+2. PeerAuthentication vs AuthorizationPolicy
+
+PeerAuthentication
+=> Controls how traffic is authenticated
+=> Manages mTLS settings
+=> Works at Layer 4 (transport level)
+
+Example to enforce strict mTLS in a namespace:
+"""
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: prod
+spec:
+  mtls:
+    mode: STRICT
+	"""
+
+AuthorizationPolicy
+=> Controls who can access what
+=> Works at Layer 7 (HTTP method, path, identity)
+=> Enforces access control after authentication
+
+
+Enforcing Strict mTLS Across Namespace
+1. Enable sidecar injection for namespace
+2. Apply PeerAuthentication with STRICT mode
+3. Use ISTIO_MUTUAL in DestinationRule
+
+
+
+
+3. Istio Traffic Management & Canary Deployment
+
+Istio traffic management uses:
+
+=> VirtualService → defines routing rules
+=> DestinationRule → defines subsets (versions)
+
+Canary Deployment Steps
+
+=> Deploy v1 and v2 pods with version labels
+=> Create DestinationRule with subsets (v1, v2)
+=> Configure VirtualService with weighted routing
+
+"""
+http:
+- route:
+  - destination:
+      host: myapp
+      subset: v1
+    weight: 90
+  - destination:
+      host: myapp
+      subset: v2
+    weight: 10
+""""
+Adjust weights gradually to shift traffic.
+
+
+
+
+
+
+
+
+4. Istio Ingress Gateway vs Kubernetes Ingress
+
+Kubernetes Ingress
+=> Basic HTTP routing
+=> Requires external controller (NGINX, etc.)
+=> Limited traffic control
+
+
+Istio Ingress Gateway
+=> Envoy-based gateway
+=> Integrated with Istio control plane
+=> Supports advanced routing (canary, A/B testing)
+=> Integrated with mTLS and policies
+=> Provides telemetry and tracing
+
+Istio Gateway is more powerful and policy-driven.
+
+
+
+
+
+
+5. Observability in Istio
+
+Istio improves observability through Envoy sidecars.
+
+Prometheus
+=> Collects metrics like request count, latency, error rate
+=> Metrics exposed automatically by Envoy
+
+Grafana
+
+=> Visualizes traffic, latency, success rate
+=> Uses prebuilt Istio dashboards
+
+Jaeger (Distributed Tracing)
+=> Tracks request flow across services
+=> Provides end-to-end trace visualization
+
+Kiali
+=> Shows service graph
+=> Displays mTLS status and traffic health
+
+
+
+
